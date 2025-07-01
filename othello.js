@@ -44,6 +44,12 @@ document.addEventListener("DOMContentLoaded", () => {
           document.getElementById("StartScreen").style.display = "none";
           Matching_Screen();
         };
+
+        document.getElementById("start-cpu").onclick = () => {
+          document.getElementById("StartScreen").style.display = "none";
+          connect_server("cpu");  // mode: "cpu" を指定
+          
+        };
       
       
         document.getElementById("reset-user").onclick = () => {
@@ -144,8 +150,11 @@ document.addEventListener("DOMContentLoaded", () => {
                   user_id: user_id,
                 }));
                 // 自分は先にスタート画面へ
-                
-                
+                board = Array.from({ length: BOARD_SIZE }, () =>
+                  Array(BOARD_SIZE).fill(0)
+                );
+                init_board(board);
+                game_started = false;
                 skip = false;
                 reload = false;
                 document.getElementById("GameScreen").style.display = "none";
@@ -160,7 +169,7 @@ document.addEventListener("DOMContentLoaded", () => {
         click_locked = !your_turn;
         status.innerText = your_turn ? "あなたのターンです" : "相手のターンです";
       }
-      function connect_server() {
+      function connect_server(mode = "online") {
         websocket = new WebSocket("wss://othello-server-pkzn.onrender.com/ws");
   
         status.style.display = "block";
@@ -177,7 +186,8 @@ document.addEventListener("DOMContentLoaded", () => {
             websocket.send(JSON.stringify({
               type: "register",
               user_id: Id,
-              name: Name
+              name: Name,
+              mode: mode  // "online" または "cpu"
             }));
           } else {
             console.warn("初回接続なのに名前やIDが設定されていません。PlayerName画面で処理されるべきです。");
@@ -313,9 +323,14 @@ document.addEventListener("DOMContentLoaded", () => {
           } else if (data.type === "opponent_surrendered") {
               alert("相手が降参しました。あなたの勝ちです。");
               document.getElementById("GameScreen").style.display = "none";
-
+              
+              board = Array.from({ length: BOARD_SIZE }, () =>
+                Array(BOARD_SIZE).fill(0)
+              );
+              init_board(board);
               
               
+              game_started = false;
               skip = false;
               reload = false;
               StartScreen();
@@ -695,6 +710,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+  
+
+
+    
   
 
 
